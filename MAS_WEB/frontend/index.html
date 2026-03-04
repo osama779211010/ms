@@ -366,6 +366,58 @@
         </main>
     </div>
 
+    <!-- Modals -->
+    <div id="addBranchModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close" onclick="closeModal('addBranchModal')">&times;</span>
+            <h3><i class="fa-solid fa-building-circle-plus"></i> إضافة فرع جديد</h3>
+            <form id="addBranchForm" onsubmit="handleCreateBranch(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <input type="text" id="branchGov" placeholder="المحافظة / المدينة" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="branchStreet" placeholder="اسم الشارع / الحي" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="text" id="branchContact" placeholder="رقم هاتف الفرع">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">حفظ الفرع</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addSecretaryModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close" onclick="closeModal('addSecretaryModal')">&times;</span>
+            <h3><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h3>
+            <form id="addSecretaryForm" onsubmit="handleRegisterSecretary(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="secName" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="secEmail" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="secPassword" placeholder="كلمة المرور" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-building"></i>
+                    <select id="secBranch" required>
+                        <option value="">اختر الفرع المسؤول عنه...</option>
+                        <!-- سيتم تعبئتها بواسطة JS -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">إتمام التسجيل</button>
+            </form>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 

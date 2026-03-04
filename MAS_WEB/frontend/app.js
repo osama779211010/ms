@@ -123,30 +123,151 @@ function updateDashboardUI(data) {
     }
 }
 
+// --- Management Features ---
+async function fetchBranches() {
+    const TOKEN = localStorage.getItem('mas_token');
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+        const branches = await response.json();
+        const tbody = document.querySelector('#branchesTable tbody');
+        tbody.innerHTML = '';
+
+        branches.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${b.id}</td>
+                <td>${b.governorate}</td>
+                <td>${b.street_name}</td>
+                <td>${b.contact_number || '---'}</td>
+                <td><span class="badge badge-success">دكتور متخصص</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Error fetching branches:", err);
+    }
+}
+
+async function populateBranchDropdown() {
+    const TOKEN = localStorage.getItem('mas_token');
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+        const branches = await response.json();
+        const select = document.getElementById('secBranch');
+        select.innerHTML = '<option value="">اختر الفرع المسؤول عنه...</option>';
+
+        branches.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id;
+            opt.textContent = `${b.governorate} - ${b.street_name}`;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Error populating dropdown:", err);
+    }
+}
+
+async function handleCreateBranch(e) {
+    e.preventDefault();
+    const TOKEN = localStorage.getItem('mas_token');
+    const data = {
+        governorate: document.getElementById('branchGov').value,
+        street_name: document.getElementById('branchStreet').value,
+        contact_number: document.getElementById('branchContact').value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${TOKEN}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('تم إضافة الفرع بنجاح!');
+            closeModal('addBranchModal');
+            fetchBranches();
+            document.getElementById('addBranchForm').reset();
+        } else {
+            alert('خطأ في الإضافة');
+        }
+    } catch (err) {
+        alert('فشل الاتصال بالسيرفر');
+    }
+}
+
+async function handleRegisterSecretary(e) {
+    e.preventDefault();
+    const data = {
+        name: document.getElementById('secName').value,
+        email: document.getElementById('secEmail').value,
+        password: document.getElementById('secPassword').value,
+        role: 'SECRETARY',
+        branch_id: document.getElementById('secBranch').value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/register/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('تم تسجيل السكرتير بنجاح!');
+            closeModal('addSecretaryModal');
+            document.getElementById('addSecretaryForm').reset();
+        } else {
+            const errData = await response.json();
+            alert('خطأ: ' + (errData.error || 'حدث خطأ غير متوقع'));
+        }
+    } catch (err) {
+        alert('فشل الاتصال بالسيرفر');
+    }
+}
+
+// Initial App Call
+function initApp() {
+    // Any initial setup for the app
+}
+
 // 2. Navigation Logic
 function switchView(viewId, element) {
+    console.log("Switching to view:", viewId);
+
     // Hide all views
-    document.querySelectorAll('.view-section').forEach(view => {
-        view.classList.remove('active');
-        view.style.display = 'none'; // Ensure CSS active state works or force hide
+    document.querySelectorAll('.view-section, .content-section').forEach(section => {
+        section.style.display = 'none';
+        section.classList.remove('active');
     });
 
-    // Remove active class from navs
-    document.querySelectorAll('.nav-item').forEach(nav => {
-        nav.classList.remove('active');
-    });
-
-    // Activate target
-    element.classList.add('active');
-
-    const targetView = document.getElementById('view-' + viewId);
-    if (targetView) {
-        targetView.classList.add('active');
-        targetView.style.display = 'block';
+    // Show selected view
+    const targetSection = document.getElementById(viewId + '-section') || document.getElementById('view-' + viewId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        targetSection.classList.add('active');
     } else {
         // Fallback placeholder
-        document.getElementById('view-placeholder').classList.add('active');
-        document.getElementById('view-placeholder').style.display = 'block';
+        const placeholder = document.getElementById('view-placeholder');
+        if (placeholder) {
+            placeholder.classList.add('active');
+            placeholder.style.display = 'block';
+        }
+    }
+
+    // Update active state in sidebar
+    if (element) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
     }
 
     // Update Header Text
@@ -155,6 +276,7 @@ function switchView(viewId, element) {
         'users': 'إدارة المستخدمين',
         'ai-models': 'نماذج الذكاء الاصطناعي',
         'doctors': 'الكادر الطبي',
+        'management': 'إدارة التنظيم والفروع',
         'system': 'حالة النظام'
     };
 
@@ -166,6 +288,26 @@ function switchView(viewId, element) {
     // Trigger Specific Data Fetching
     if (viewId === 'users') fetchUsers();
     if (viewId === 'doctors') fetchDoctors();
+    if (viewId === 'management') fetchBranches();
+}
+
+// --- Modals ---
+function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+    if (id === 'addSecretaryModal') {
+        populateBranchDropdown();
+    }
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+// Close on outside click
+window.onclick = function (event) {
+    if (event.target.className === 'modal') {
+        event.target.style.display = "none";
+    }
 }
 
 async function fetchUsers() {

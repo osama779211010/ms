@@ -1,164 +1,495 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAS - نظام التحليل الطبي</title>
+    <title>MAS Admin - لوحة التحكم</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js for beautiful graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+
+<body class="dashboard-body">
+
+    <!-- Background Animated Grid / Orbs -->
+    <div class="background-effects">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="تبديل المظهر">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+    </button>
+
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-heart-pulse"></i>
-                <span>MAS</span> System
+        <aside class="admin-sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo-circle">
+                    <img src="../assets/image/MAS.png" alt="MAS Logo" class="rotating-mas">
+                </div>
+                <h2>MAS <span>Admin</span></h2>
             </div>
-            <ul class="nav-links">
-                <li class="nav-item active">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>لوحة التحكم</span>
-                </li>
-                <li class="nav-item">
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="switchView('overview', this)">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>نظرة عامة</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('users', this)">
+                    <i class="fa-solid fa-users"></i>
+                    <span>إدارة المستخدمين</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('ai-models', this)">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>نماذج الذكاء الاصطناعي</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('doctors', this)">
                     <i class="fa-solid fa-user-doctor"></i>
-                    <span>المرضى</span>
-                </li>
-                <li class="nav-item">
-                    <i class="fa-solid fa-file-medical"></i>
-                    <span>التقارير</span>
-                </li>
-                <li class="nav-item">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>الإعدادات</span>
-                </li>
-            </ul>
+                    <span>الكادر الطبي</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('management', this)">
+                    <i class="fa-solid fa-building-ngo"></i>
+                    <span>إدارة الفروع</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-ads" onclick="switchView('ads', this)">
+                    <i class="fa-solid fa-rectangle-ad"></i>
+                    <span>إدارة الإعلانات</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('system', this)">
+                    <i class="fa-solid fa-server"></i>
+                    <span>حالة النظام</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">م</div>
+                    <div class="details">
+                        <span class="name">المدير العام</span>
+                        <span class="role">Admin Console</span>
+                    </div>
+                </div>
+                <a href="javascript:void(0)" class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <main class="main-content">
-            <header class="header">
-                <div>
-                    <h1>لوحة التحليل الطبي</h1>
-                    <p style="color: var(--text-secondary)">التشخيص والمراقبة بالذكاء الاصطناعي في الوقت الفعلي</p>
+
+            <!-- Navbar -->
+            <header class="top-nav glass-panel">
+                <div class="nav-left">
+                    <h1 class="page-title" id="current-page-title">نظرة عامة (Overview)</h1>
+                    <p class="page-subtitle">أهلاً بك في مركز التحكم بـ MAS AI.</p>
                 </div>
-                <div class="user-profile" style="text-align: right;">
-                    <div style="text-align: left;">
-                        <div style="font-weight: 600">د. أسامة</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary)">أخصائي قلب</div>
+                <div class="nav-right">
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="بحث سريع في النظام...">
                     </div>
-                    <div class="user-avatar"></div>
+                    <button class="notif-btn">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
                 </div>
             </header>
 
-            <div class="dashboard-grid">
-                <!-- Chest X-Ray Upload -->
-                <div class="card upload-card" id="drop-zone">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-x-ray"></i> تحليل أشعة الصدر</span>
-                        <span class="badge" style="background: rgba(0, 212, 255, 0.1); color: var(--accent-color); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">AI Model v2.1</span>
-                    </div>
-                    <div class="upload-area" id="upload-area">
-                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                        <h3 style="margin-bottom: 0.5rem">رفع صورة الأشعة</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem">اسحب وأفلت أو انقر للتصفح</p>
-                        <input type="file" id="file-input" hidden accept="image/*">
-                        <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">اختر ملف</button>
-                    </div>
-                    <div id="preview-area" style="display: none; height: 100%; position: relative;">
-                        <img id="image-preview" src="" alt="X-Ray" style="max-height: 100%; max-width: 100%; display: block; margin: 0 auto; border-radius: 8px;">
-                        <button class="btn" style="position: absolute; top: 1rem; left: 1rem; right: auto; background: rgba(0,0,0,0.6);" onclick="resetUpload()"><i class="fa-solid fa-times"></i></button>
-                    </div>
-                </div>
+            <!-- ### VIEW: OVERVIEW ### -->
+            <section id="view-overview" class="view-section active">
 
-                <!-- Analysis Results -->
-                <div class="card results-card">
-                    <div class="card-header">
-                        <span class="card-title">نتائج التشخيص</span>
-                        <i class="fa-solid fa-microscope" style="color: var(--text-secondary)"></i>
-                    </div>
-                    
-                    <div id="loading-state" style="display: none; text-align: center; padding: 2rem;">
-                        <div class="loader"></div>
-                        <p style="margin-top: 1rem; color: var(--text-secondary)">جاري تحليل الصورة...</p>
+                <!-- Stat Cards Row -->
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-icon" style="color: #00d4ff; background: rgba(0, 212, 255, 0.1);">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3>إجمالي المستخدمين</h3>
+                            <div class="value">12,450</div>
+                            <div class="trend positive"><i class="fa-solid fa-arrow-up"></i> +12% هذا الأسبوع</div>
+                        </div>
                     </div>
 
-                    <div id="results-content">
-                        <div class="stat-row">
-                            <span class="stat-label">احتمالية الالتهاب الرئوي</span>
-                            <span class="stat-value" id="pneumonia-prob">--%</span>
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-icon" style="color: #00ffaa; background: rgba(0, 255, 170, 0.1);">
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-                        <div class="stat-row">
-                            <span class="stat-label">درجة الثقة</span>
-                            <span class="stat-value" style="color: var(--accent-color)">--</span>
+                        <div class="stat-details">
+                            <h3>تشخيصات اليوم</h3>
+                            <div class="value">342</div>
+                            <div class="trend positive"><i class="fa-solid fa-arrow-up"></i> +5% معدل نشاط</div>
                         </div>
-                        <div class="stat-row">
-                            <span class="stat-label">جودة المسح</span>
-                            <span class="stat-value">--</span>
+                    </div>
+
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-icon" style="color: #bc00dd; background: rgba(188, 0, 221, 0.1);">
+                            <i class="fa-solid fa-brain"></i>
                         </div>
-                        
-                        <div style="margin-top: 2rem;">
-                            <h4 style="margin-bottom: 1rem; color: var(--text-secondary)">توصية الذكاء الاصطناعي</h4>
-                            <p id="recommendation-text" style="font-size: 0.9rem; line-height: 1.6;">
-                                الرجاء رفع صورة أشعة للبدء في التحليل.
-                            </p>
+                        <div class="stat-details">
+                            <h3>دقة الـ AI الحالية</h3>
+                            <div class="value">98.5%</div>
+                            <div class="trend stable"><i class="fa-solid fa-minus"></i> مستقر</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-icon" style="color: #ff3366; background: rgba(255, 51, 102, 0.1);">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3>ضغط السيرفر</h3>
+                            <div class="value">42%</div>
+                            <div class="trend warning"><i class="fa-solid fa-bolt"></i> طبيعي</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ECG Reports -->
-                <div class="card ecg-card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-heart-pulse" style="color: var(--danger-color)"></i> تقرير تخطيط القلب المباشر</span>
-                        <button class="btn" style="padding: 4px 8px; font-size: 0.8rem; background: rgba(255,255,255,0.1)">عرض السجل</button>
-                    </div>
-                    <div class="graph-placeholder">
-                        <div class="ecg-line"></div>
-                        <span style="z-index: 1;">تصور مباشر للنظم القلبي</span>
-                    </div>
-                    <div style="display: flex; gap: 2rem; margin-top: 1rem;">
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary)">معدل ضربات القلب</div>
-                            <div style="font-size: 1.2rem; font-weight: 700">72 <span style="font-size: 0.8rem; font-weight: 400">BPM</span></div>
-                        </div>
-                         <div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary)">التباين</div>
-                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--success-color)">طبيعي</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Charts & Tables Area -->
+                <div class="dashboard-body-grid">
 
-                <!-- Breast Cancer Models -->
-                <div class="card cancer-card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fa-solid fa-ribbon" style="color: #ff69b4"></i> نماذج سرطان الثدي</span>
+                    <!-- Main Chart -->
+                    <div class="chart-container glass-panel wow-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-activity"></i> نشاط النظام والتشخيصات (أسبوعياً)</h2>
+                            <select class="glass-select">
+                                <option>هذا الأسبوع</option>
+                                <option>هذا الشهر</option>
+                            </select>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="activityChart"></canvas>
+                        </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px;">
-                            <div style="font-size: 0.9rem; margin-bottom: 0.5rem">سرطان قنوي غازي</div>
-                            <div class="progress-bar" style="height: 6px; background: #333; border-radius: 3px; overflow: hidden;">
-                                <div style="width: 15%; height: 100%; background: #ff69b4;"></div>
+
+                    <!-- AI Models Health -->
+                    <div class="ai-health-container glass-panel wow-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-microchip"></i> صحة النماذج (AI Models)</h2>
+                        </div>
+                        <div class="health-bars">
+
+                            <div class="health-item">
+                                <div class="health-info">
+                                    <span>PneumoniaNet v2 (أشعة الصدر)</span>
+                                    <span class="percent" style="color:#00ffaa">99%</span>
+                                </div>
+                                <div class="progress-track" style="--val: 99%; --color: #00ffaa">
+                                    <div class="progress-fill"></div>
+                                </div>
                             </div>
-                            <div style="text-align: left; font-size: 0.8rem; margin-top: 4px;">15% خطر</div>
-                        </div>
-                         <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px;">
-                            <div style="font-size: 0.9rem; margin-bottom: 0.5rem">سرطان فصيصي</div>
-                            <div class="progress-bar" style="height: 6px; background: #333; border-radius: 3px; overflow: hidden;">
-                                <div style="width: 5%; height: 100%; background: #ff69b4;"></div>
+
+                            <div class="health-item">
+                                <div class="health-info">
+                                    <span>BraTS Analyzer (أورام الدماغ)</span>
+                                    <span class="percent" style="color:#00d4ff">97%</span>
+                                </div>
+                                <div class="progress-track" style="--val: 97%; --color: #00d4ff">
+                                    <div class="progress-fill"></div>
+                                </div>
                             </div>
-                            <div style="text-align: left; font-size: 0.8rem; margin-top: 4px;">5% خطر</div>
+
+                            <div class="health-item">
+                                <div class="health-info">
+                                    <span>SkinCancer Detector</span>
+                                    <span class="percent" style="color:#ffcc00">92%</span>
+                                </div>
+                                <div class="progress-track" style="--val: 92%; --color: #ffcc00">
+                                    <div class="progress-fill"></div>
+                                </div>
+                            </div>
+
+                            <div class="health-item">
+                                <div class="health-info">
+                                    <span>Gemma Medical Assistant (المحادثة)</span>
+                                    <span class="percent" style="color:#bc00dd">95%</span>
+                                </div>
+                                <div class="progress-track" style="--val: 95%; --color: #bc00dd">
+                                    <div class="progress-fill"></div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                     <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(90deg, #ff69b4, #ff3366);">تشغيل فحص متقدم</button>
+
+                    <!-- Recent Activity Table -->
+                    <div class="table-container glass-panel wow-card full-width">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-list-check"></i> سجل العمليات المباشر (Live Queue)</h2>
+                            <button class="btn btn-outline" style="padding: 5px 15px; font-size: 0.9rem;">تحديث</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID العملية</th>
+                                        <th>المريض / المستخدم</th>
+                                        <th>نوع التحليل</th>
+                                        <th>تاريخ الطلب</th>
+                                        <th>دقة الـ AI</th>
+                                        <th>الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#REQ-8902</td>
+                                        <td>
+                                            <div class="tbl-user"><img src="https://i.pravatar.cc/150?img=11" alt="u">
+                                                خالد العتيبي</div>
+                                        </td>
+                                        <td>صورة شبكية (Pneumonia)</td>
+                                        <td>منذ 2 دقيقة</td>
+                                        <td>94.2%</td>
+                                        <td><span class="badge badge-success">مكتمل</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#REQ-8901</td>
+                                        <td>
+                                            <div class="tbl-user"><img src="https://i.pravatar.cc/150?img=32" alt="u">
+                                                سارة أحمد</div>
+                                        </td>
+                                        <td>ورم دماغ (BraTS)</td>
+                                        <td>منذ 5 دقائق</td>
+                                        <td>98.9%</td>
+                                        <td><span class="badge badge-success">مكتمل</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#REQ-8900</td>
+                                        <td>
+                                            <div class="tbl-user"><img src="https://i.pravatar.cc/150?img=15" alt="u">
+                                                محمد سالم</div>
+                                        </td>
+                                        <td>سرطان جلد (Skin)</td>
+                                        <td>منذ 12 دقيقة</td>
+                                        <td>--</td>
+                                        <td><span class="badge badge-warning">قيد التحليل</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#REQ-8899</td>
+                                        <td>
+                                            <div class="tbl-user"><img src="https://i.pravatar.cc/150?img=5" alt="u"> د.
+                                                أسامة (طبيب)</div>
+                                        </td>
+                                        <td>استشارة ذكاء اصطناعي (Gemma)</td>
+                                        <td>منذ 15 دقيقة</td>
+                                        <td>91.0%</td>
+                                        <td><span class="badge badge-primary">تم الرد</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ### VIEW: USERS ### -->
+            <section id="view-users" class="view-section" style="display: none;">
+                <div class="table-container glass-panel wow-card full-width">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-users"></i> قائمة المستخدمين المسجلين</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <!-- Loaded via AJAX -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ### VIEW: DOCTORS ### -->
+            <section id="view-doctors" class="view-section" style="display: none;">
+                <div class="table-container glass-panel wow-card full-width">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-user-doctor"></i> الطاقم الطبي المعتمد</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <!-- Loaded via AJAX -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ### VIEW: AI MODELS ### -->
+            <section id="view-ai-models" class="view-section" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-details">
+                            <h3>Pneumonia V2</h3>
+                            <div class="value">99%</div>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-details">
+                            <h3>Brain Tumor</h3>
+                            <div class="value">97%</div>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-details">
+                            <h3>Skin Cancer</h3>
+                            <div class="value">92%</div>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
+                <div class="glass-panel wow-card" style="margin-top: 2rem; padding: 2rem;">
+                    <h2>حالات النماذج الفنية</h2>
+                    <p>جميع النماذج تعمل على خوادم TFLite المحسنة للجوال والويب.</p>
+                </div>
+            </section>
+
+            <!-- ### VIEW: AD MANAGEMENT ### -->
+            <section id="view-ads" class="view-section" style="display: none;">
+                <div class="glass-panel wow-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-rectangle-ad"></i> التحكم بالإعلانات المتحركة</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addAdModal')"
+                            style="width: auto; padding: 0.6rem 1.2rem;">
+                            <i class="fa-solid fa-plus"></i> إضافة إعلان جديد
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <div class="loader">جاري التحميل...</div>
+                        <table class="admin-table" id="adsTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>الصورة</th>
+                                    <th>العنوان</th>
+                                    <th>النص الفرعي</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ### VIEW: SYSTEM ### -->
+            <section id="view-system" class="view-section" style="display: none;">
+                <div class="glass-panel" style="padding: 4rem; text-align: center;">
+                    <i class="fa-solid fa-server"
+                        style="font-size: 4rem; color: var(--accent-light); margin-bottom: 2rem;"></i>
+                    <h2>نظام MAS قيد التشغيل</h2>
+                    <p style="color: var(--text-muted);">جميع الخدمات تعمل بشكل طبيعي. دقة نماذج الذكاء الاصطناعي
+                        مستقرة.</p>
+                </div>
+            </section>
+
+            <!-- ### VIEW: PLACEHOLDER ### -->
+            <section id="view-placeholder" class="view-section" style="display: none;">
+                <div class="glass-panel" style="padding: 4rem; text-align: center;">
+                    <i class="fa-solid fa-tools"
+                        style="font-size: 4rem; color: var(--accent-light); margin-bottom: 2rem;"></i>
+                    <h2>جاري تطوير هذه الصفحة</h2>
+                    <p style="color: var(--text-muted);">هذه الوحدة الإدارية للذكاء الاصطناعي قيد الإنشاء ضمن التحديثات
+                        القادمة للوحة التحكم.</p>
+                </div>
+            </section>
+
         </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="addBranchModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close" onclick="closeModal('addBranchModal')">&times;</span>
+            <h3><i class="fa-solid fa-building-circle-plus"></i> إضافة فرع جديد</h3>
+            <form id="addBranchForm" onsubmit="handleCreateBranch(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <input type="text" id="branchGov" placeholder="المحافظة / المدينة" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="branchStreet" placeholder="اسم الشارع / الحي" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="text" id="branchContact" placeholder="رقم هاتف الفرع">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">حفظ الفرع</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addSecretaryModal" class="modal">
+        <div class="modal-content glass-panel">
+            <span class="close" onclick="closeModal('addSecretaryModal')">&times;</span>
+            <h3><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h3>
+            <form id="addSecretaryForm" onsubmit="handleRegisterSecretary(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="secName" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="secEmail" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="secPassword" placeholder="كلمة المرور" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-building"></i>
+                    <select id="secBranch" required>
+                        <option value="">اختر الفرع المسؤول عنه...</option>
+                        <!-- سيتم تعبئتها بواسطة JS -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">إتمام التسجيل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Advertisement -->
+    <div id="addAdModal" class="modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>إضافة إعلان جديد</h2>
+                <span class="close" onclick="closeModal('addAdModal')">&times;</span>
+            </div>
+            <form id="addAdForm" onsubmit="handleCreateAd(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-heading input-icon"></i>
+                    <input type="text" id="adTitle" placeholder="عنوان الإعلان الرئيسي..." required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-paragraph input-icon"></i>
+                    <input type="text" id="adSubtitle" placeholder="النص الفرعي..." required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-link input-icon"></i>
+                    <input type="url" id="adLink" placeholder="رابط الإعلان (اختياري)...">
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="adImage" class="file-label">
+                        <i class="fa-solid fa-cloud-upload-alt"></i>
+                        <span>اختر صورة الإعلان...</span>
+                    </label>
+                    <input type="file" id="adImage" accept="image/*" required onchange="previewAdImage(this)">
+                    <div id="adImagePreview" class="image-preview-box"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-save"></i> حفظ ونشر الإعلان
+                </button>
+            </form>
+        </div>
     </div>
 
     <script src="app.js"></script>
 </body>
+
 </html>

@@ -883,10 +883,15 @@ body.light-mode .glass-select {
 }
 
 .modal-content {
-    margin: 8% auto;
+    margin: 5% auto;
+    /* Reduced top margin to fit better */
     padding: 30px;
     width: 90%;
     max-width: 500px;
+    max-height: 85vh;
+    /* Prevent it from exceeding the screen height */
+    overflow-y: auto;
+    /* Enable scrolling if content is too tall */
     border-radius: 25px;
     animation: slideUp 0.3s ease-out;
 }

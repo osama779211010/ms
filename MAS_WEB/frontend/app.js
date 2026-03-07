@@ -277,6 +277,7 @@ function switchView(viewId, element) {
         'ai-models': 'نماذج الذكاء الاصطناعي',
         'doctors': 'الكادر الطبي',
         'management': 'إدارة التنظيم والفروع',
+        'ads': 'إدارة الإعلانات والترويج',
         'system': 'حالة النظام'
     };
 
@@ -289,6 +290,7 @@ function switchView(viewId, element) {
     if (viewId === 'users') fetchUsers();
     if (viewId === 'doctors') fetchDoctors();
     if (viewId === 'management') fetchBranches();
+    if (viewId === 'ads') fetchAds();
 }
 
 // --- Modals ---
@@ -398,6 +400,113 @@ function renderDoctorTable(doctors) {
 
     html += '</tbody></table>';
     document.querySelector('#view-doctors .table-responsive').innerHTML = html;
+}
+
+// --- Advertising Management ---
+async function fetchAds() {
+    const token = localStorage.getItem('mas_token');
+    const table = document.getElementById('adsTable');
+    const loader = document.querySelector('#view-ads .loader');
+
+    try {
+        const response = await fetch(`${API_BASE}/ad-banners/`, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+        const ads = await response.json();
+
+        loader.style.display = 'none';
+        table.style.display = 'table';
+        renderAdsTable(ads);
+    } catch (err) {
+        console.error("Error fetching ads:", err);
+    }
+}
+
+function renderAdsTable(ads) {
+    const tbody = document.querySelector('#adsTable tbody');
+    tbody.innerHTML = '';
+
+    ads.forEach(ad => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${ad.image}" class="ad-thumb"></td>
+            <td>${ad.title}</td>
+            <td>${ad.subtitle}</td>
+            <td><span class="badge ${ad.is_active ? 'badge-success' : 'badge-warning'}">${ad.is_active ? 'نشط' : 'متوقف'}</span></td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-icon delete" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function previewAdImage(input) {
+    const preview = document.getElementById('adImagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.style.display = 'block';
+            preview.innerHTML = `<img src="${e.target.result}">`;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+async function handleCreateAd(e) {
+    e.preventDefault();
+    const TOKEN = localStorage.getItem('mas_token');
+    const formData = new FormData();
+    formData.append('title', document.getElementById('adTitle').value);
+    formData.append('subtitle', document.getElementById('adSubtitle').value);
+    if (document.getElementById('adLink').value) {
+        formData.append('link_url', document.getElementById('adLink').value);
+    }
+    formData.append('image', document.getElementById('adImage').files[0]);
+    formData.append('is_active', true);
+
+    try {
+        const response = await fetch(`${API_BASE}/ad-banners/`, {
+            method: 'POST',
+            headers: { 'Authorization': `Token ${TOKEN}` },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert('تم إضافة الإعلان بنجاح!');
+            closeModal('addAdModal');
+            fetchAds();
+            document.getElementById('addAdForm').reset();
+            document.getElementById('adImagePreview').style.display = 'none';
+        } else {
+            alert('خطأ في إضافة الإعلان');
+        }
+    } catch (err) {
+        alert('فشل الاتصال بالسيرفر');
+    }
+}
+
+async function deleteAd(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الإعلان؟')) return;
+    const TOKEN = localStorage.getItem('mas_token');
+
+    try {
+        const response = await fetch(`${API_BASE}/ad-banners/${id}/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+
+        if (response.ok) {
+            fetchAds();
+        } else {
+            alert('فشل في الحذف');
+        }
+    } catch (err) {
+        alert('حدث خطأ');
+    }
 }
 
 // 3. UI Animations (Progress Bars)

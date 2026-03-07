@@ -56,6 +56,14 @@
                     <i class="fa-solid fa-user-doctor"></i>
                     <span>الكادر الطبي</span>
                 </a>
+                <a href="#" class="nav-item" onclick="switchView('management', this)">
+                    <i class="fa-solid fa-building-ngo"></i>
+                    <span>إدارة الفروع</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-ads" onclick="switchView('ads', this)">
+                    <i class="fa-solid fa-rectangle-ad"></i>
+                    <span>إدارة الإعلانات</span>
+                </a>
                 <a href="#" class="nav-item" onclick="switchView('system', this)">
                     <i class="fa-solid fa-server"></i>
                     <span>حالة النظام</span>
@@ -341,6 +349,34 @@
                 </div>
             </section>
 
+            <!-- ### VIEW: AD MANAGEMENT ### -->
+            <section id="view-ads" class="view-section" style="display: none;">
+                <div class="glass-panel wow-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-rectangle-ad"></i> التحكم بالإعلانات المتحركة</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addAdModal')"
+                            style="width: auto; padding: 0.6rem 1.2rem;">
+                            <i class="fa-solid fa-plus"></i> إضافة إعلان جديد
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <div class="loader">جاري التحميل...</div>
+                        <table class="admin-table" id="adsTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>الصورة</th>
+                                    <th>العنوان</th>
+                                    <th>النص الفرعي</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- ### VIEW: SYSTEM ### -->
             <section id="view-system" class="view-section" style="display: none;">
                 <div class="glass-panel" style="padding: 4rem; text-align: center;">
@@ -414,6 +450,41 @@
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">إتمام التسجيل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Advertisement -->
+    <div id="addAdModal" class="modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>إضافة إعلان جديد</h2>
+                <span class="close" onclick="closeModal('addAdModal')">&times;</span>
+            </div>
+            <form id="addAdForm" onsubmit="handleCreateAd(event)">
+                <div class="input-group">
+                    <i class="fa-solid fa-heading input-icon"></i>
+                    <input type="text" id="adTitle" placeholder="عنوان الإعلان الرئيسي..." required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-paragraph input-icon"></i>
+                    <input type="text" id="adSubtitle" placeholder="النص الفرعي..." required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-link input-icon"></i>
+                    <input type="url" id="adLink" placeholder="رابط الإعلان (اختياري)...">
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="adImage" class="file-label">
+                        <i class="fa-solid fa-cloud-upload-alt"></i>
+                        <span>اختر صورة الإعلان...</span>
+                    </label>
+                    <input type="file" id="adImage" accept="image/*" required onchange="previewAdImage(this)">
+                    <div id="adImagePreview" class="image-preview-box"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-save"></i> حفظ ونشر الإعلان
+                </button>
             </form>
         </div>
     </div>

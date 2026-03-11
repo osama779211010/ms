@@ -4,26 +4,27 @@
 ======================================================= */
 
 :root {
-    /* ---------------- DARK MODE (DEFAULT) ---------------- */
-    --bg-base: #0a0e17;
-    --bg-secondary: #0f1522;
-    --bg-glass: rgba(15, 21, 34, 0.6);
+    /* ---------------- DARK MODE (DEFAULT) - MAS MEDICAL HUB REDESIGN ---------------- */
+    --bg-base: #0f0a0c;
+    --bg-secondary: #1a0f12;
+    --bg-glass: rgba(26, 15, 18, 0.7);
     --border-glass: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(0, 212, 255, 0.3);
+    --border-hover: rgba(176, 0, 73, 0.4);
 
     --text-main: #ffffff;
-    --text-muted: #8b9bb4;
+    --text-muted: #b48b96;
 
-    --accent-main: #00d4ff;
-    --accent-light: #4df0ff;
-    --accent-glow: rgba(0, 212, 255, 0.4);
+    --accent-main: #B00049;
+    /* Deep Raspberry */
+    --accent-light: #d1306d;
+    --accent-glow: rgba(176, 0, 73, 0.4);
 
     --success: #00ffaa;
     --warning: #ffcc00;
     --danger: #ff3366;
 
-    --orb-1: #00d4ff;
-    --orb-2: #bc00dd;
+    --orb-1: #B00049;
+    --orb-2: #6a002c;
 
     /* Common Geometry */
     --radius-sm: 8px;
@@ -35,27 +36,27 @@
 
 /* ---------------- LIGHT MODE ---------------- */
 body.light-mode {
-    --bg-base: #f0f4f8;
-    --bg-secondary: #e2e8f0;
-    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-base: #f8f0f2;
+    --bg-secondary: #f0e2e5;
+    --bg-glass: rgba(255, 255, 255, 0.75);
     --border-glass: rgba(0, 0, 0, 0.05);
-    --border-hover: rgba(0, 102, 255, 0.2);
+    --border-hover: rgba(176, 0, 73, 0.2);
 
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --text-main: #3b1e25;
+    --text-muted: #8b646d;
 
-    --accent-main: #0284c7;
-    --accent-light: #0ea5e9;
-    --accent-glow: rgba(2, 132, 199, 0.2);
+    --accent-main: #B00049;
+    --accent-light: #9c0041;
+    --accent-glow: rgba(176, 0, 73, 0.15);
 
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
 
-    --orb-1: #38bdf8;
+    --orb-1: #ff8fb5;
     --orb-2: #c084fc;
 
-    --shadow-glass: 0 8px 32px 0 rgba(30, 41, 59, 0.1);
+    --shadow-glass: 0 8px 32px 0 rgba(59, 30, 41, 0.1);
 }
 
 /* =======================================================
@@ -260,24 +261,33 @@ body {
 }
 
 .logo-container {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     display: inline-block;
-    padding: 1rem;
-    background: rgba(0, 212, 255, 0.05);
+    padding: 0.8rem;
+    background: rgba(176, 0, 73, 0.1);
     border-radius: 50%;
-    border: 1px solid rgba(0, 212, 255, 0.1);
-    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.05);
+    border: 1.5px solid rgba(176, 0, 73, 0.2);
+    box-shadow: 0 0 30px rgba(176, 0, 73, 0.15);
+    overflow: hidden;
+    position: relative;
 }
 
 .rotating-logo img {
-    width: 80px;
-    height: 80px;
-    animation: rotateLogo 15s linear infinite;
-    filter: drop-shadow(0 0 10px var(--accent-glow));
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    animation: rotateLogo 20s linear infinite;
+    filter: drop-shadow(0 0 15px rgba(176, 0, 73, 0.3));
+    display: block;
 }
 
 @keyframes rotateLogo {
-    100% {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
         transform: rotate(360deg);
     }
 }

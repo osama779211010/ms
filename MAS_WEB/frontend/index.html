@@ -12,28 +12,27 @@
     <div id="result" style="margin-top: 20px;"></div>
 
     <script>
-    async function checkBalance() {
+    function checkBalance() {
         const token = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiMjIyNzA5ODAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9tb2JpbGVwaG9uZSI6Ijc4MzAwOTc5OCIsImxvZ2luLWRhdGUiOiI2MzkwODc5NjQ5OTA4NjE4NDkiLCJzZXNzaW9uLWlkIjoiYzYwZWVmZDAtNjc1Mi0yODVlLTA4Y2UtYTM5NGI5NzkyZWIxIiwiVFQiOiJBQ1QiLCJleHAiOjE3NzMxOTk5OTksImlzcyI6IlNlZXJTb2x1dGlvbnNLakFwaSIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjcxMzUifQ.Ad9UZAbRvGnrPi8bcfu0qpMr7ShkBP7jhxWbwe3dvsCwnIDKAuryKyn_ckDE4voiJQvTf5OyisJeXMCrxGDqIyJPAEwD8Qii0TsbX-oDXuvcGJiQ_OqbdA4ZyEpmqk3DBEG__teGYe5UX_5yYzA51-SK5qpWjvbTfNkj984LphiB1mBz";
         
-        try {
-            const response = await fetch('http://74.248.155.12/revampglobal/banking/api/v1.0/banking/balance/3049799224', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    // استخدام User-Agent إنجليزي فقط
-                    'User-Agent': 'KuraimiMobile/1.0',
-                    'Accept-Language': 'ar'
-                }
-            });
-            
-            const data = await response.json();
+        fetch('http://74.248.155.12/revampglobal/banking/api/v1.0/banking/balance/3049799224', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'User-Agent': 'الكريمي جوال',
+                'Accept-Language': 'ar'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
             document.getElementById('result').innerHTML = 
-                `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        } catch (error) {
+                `<h3>الرصيد الحالي: ${data.balance} ${data.currency}</h3>`;
+        })
+        .catch(error => {
             document.getElementById('result').innerHTML = 
                 `<h3 style="color: red;">خطأ: ${error.message}</h3>`;
-        }
+        });
     }
     </script>
 </body>

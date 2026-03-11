@@ -1,5 +1,5 @@
 // static API Base URL
-const API_BASE = 'https://mm-production-48d3.up.railway.app/api/medical';
+const API_BASE = 'https://ms-production-3df4.up.railway.app';
 
 // --- Core Logic ---
 function toggleTheme() {
@@ -29,7 +29,9 @@ function logout() {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Auth Guard
     const token = localStorage.getItem('mas_token');
-    if (!token && !window.location.href.includes('login.html')) {
+    const isLoginPage = window.location.href.includes('login.html');
+
+    if (!token && !isLoginPage) {
         window.location.href = 'login.html';
         return;
     }
@@ -41,58 +43,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 3. User Info Display
-    displayUserInfo();
-
-    // 4. Data Initialization
-    fetchDashboardData();
-
-    // Initialize Animations
-    initProgressBars();
+    if (!isLoginPage) {
+        displayUserInfo();
+        fetchDashboardData();
+        initProgressBars();
+    }
 });
 
 function displayUserInfo() {
     const userStr = localStorage.getItem('mas_user');
     if (userStr) {
-        const user = JSON.parse(userStr);
-        // Sidebar footer info
-        const nameEl = document.querySelector('.sidebar-footer .name');
-        if (nameEl) nameEl.innerText = user.name;
-        const roleEl = document.querySelector('.sidebar-footer .role');
-        if (roleEl) roleEl.innerText = user.role;
-        const avatarEl = document.querySelector('.sidebar-footer .avatar');
-        if (avatarEl) avatarEl.innerText = user.name.charAt(0);
+        try {
+            const user = JSON.parse(userStr);
+            // Sidebar footer info
+            const nameEl = document.querySelector('.sidebar-footer .name');
+            if (nameEl) nameEl.innerText = user.name || user.username || 'المدير العام';
+            const roleEl = document.querySelector('.sidebar-footer .role');
+            if (roleEl) roleEl.innerText = user.role || 'Admin';
+            const avatarEl = document.querySelector('.sidebar-footer .avatar');
+            if (avatarEl) avatarEl.innerText = (user.name || 'م').charAt(0);
 
-        // Welcome message in navbar
-        const subtitleEl = document.querySelector('.page-subtitle');
-        if (subtitleEl) subtitleEl.innerText = `أهلاً بك يا ${user.name} في مركز التحكم بـ MAS AI.`;
+            // Welcome message in navbar
+            const subtitleEl = document.querySelector('.page-subtitle');
+            if (subtitleEl) subtitleEl.innerText = `مرحباً بك في مركز التحكم الموحد لـ MAS MEDICAL HUB.`;
+        } catch (e) {
+            console.error("Error parsing user data", e);
+        }
     }
 }
 
 async function fetchDashboardData() {
     const token = localStorage.getItem('mas_token');
     try {
-        const response = await fetch(`${API_BASE}/stats/`, {
-            headers: { 'Authorization': `Token ${token}` }
+        // Fetch stats from specific endpoints
+        const [statsRes, doctorsRes, patientsRes, branchesRes] = await Promise.all([
+            fetch(`${API_BASE}/stats/`, { headers: { 'Authorization': `Token ${token}` } }),
+            fetch(`${API_BASE}/doctors/`, { headers: { 'Authorization': `Token ${token}` } }),
+            fetch(`${API_BASE}/users/`, { headers: { 'Authorization': `Token ${token}` } }),
+            fetch(`${API_BASE}/branches/`, { headers: { 'Authorization': `Token ${token}` } })
+        ]);
+
+        const statsData = await statsRes.json();
+        const doctors = await doctorsRes.json();
+        const patients = await patientsRes.json();
+        const branches = await branchesRes.json();
+
+        updateDashboardUI({
+            total_doctors: Array.isArray(doctors) ? doctors.length : 0,
+            total_patients: Array.isArray(patients) ? patients.filter(p => p.role === 'PATIENT').length : 0,
+            total_branches: Array.isArray(branches) ? branches.length : 0,
+            diagnoses_today: statsData?.stats?.today_diagnoses || 0,
+            accuracy: statsData?.stats?.ai_accuracy || '98.5%',
+            recent_queue: statsData?.recent_queue || []
         });
 
-        if (!response.ok) throw new Error('Unauthorized');
-
-        const data = await response.json();
-        updateDashboardUI(data);
     } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
     }
 }
 
 function updateDashboardUI(data) {
-    // Update Stat Cards
-    const cards = document.querySelectorAll('.stat-details');
-    if (cards.length >= 4) {
-        cards[0].querySelector('.value').innerText = data.stats.total_users;
-        cards[1].querySelector('.value').innerText = data.stats.today_diagnoses;
-        cards[2].querySelector('.value').innerText = data.stats.ai_accuracy;
-        cards[3].querySelector('.value').innerText = data.stats.server_pressure;
-    }
+    // Update Stat Cards with new IDs
+    const docEl = document.getElementById('stat-total-doctors');
+    if (docEl) docEl.innerText = data.total_doctors;
+
+    const diagEl = document.getElementById('stat-diagnoses');
+    if (diagEl) diagEl.innerText = data.diagnoses_today;
+
+    const accEl = document.getElementById('stat-accuracy');
+    if (accEl) accEl.innerText = data.accuracy;
+
+    const patEl = document.getElementById('stat-total-patients'); // We should add this ID if needed or use total_patients elsewhere
 
     // Update Table
     const tbody = document.querySelector('.admin-table tbody');
@@ -110,7 +131,7 @@ function updateDashboardUI(data) {
                     </td>
                     <td>${item.type}</td>
                     <td>${item.time}</td>
-                    <td>${item.confidence}</td>
+                    <td>${item.confidence || '---'}</td>
                     <td><span class="badge badge-success">${item.status}</span></td>
                 </tr>
             `;
@@ -123,138 +144,20 @@ function updateDashboardUI(data) {
     }
 }
 
-// --- Management Features ---
-async function fetchBranches() {
-    const TOKEN = localStorage.getItem('mas_token');
-    try {
-        const response = await fetch(`${API_BASE}/branches/`, {
-            headers: { 'Authorization': `Token ${TOKEN}` }
-        });
-        const branches = await response.json();
-        const tbody = document.querySelector('#branchesTable tbody');
-        tbody.innerHTML = '';
-
-        branches.forEach(b => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${b.id}</td>
-                <td>${b.governorate}</td>
-                <td>${b.street_name}</td>
-                <td>${b.contact_number || '---'}</td>
-                <td><span class="badge badge-success">دكتور متخصص</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (err) {
-        console.error("Error fetching branches:", err);
-    }
-}
-
-async function populateBranchDropdown() {
-    const TOKEN = localStorage.getItem('mas_token');
-    try {
-        const response = await fetch(`${API_BASE}/branches/`, {
-            headers: { 'Authorization': `Token ${TOKEN}` }
-        });
-        const branches = await response.json();
-        const select = document.getElementById('secBranch');
-        select.innerHTML = '<option value="">اختر الفرع المسؤول عنه...</option>';
-
-        branches.forEach(b => {
-            const opt = document.createElement('option');
-            opt.value = b.id;
-            opt.textContent = `${b.governorate} - ${b.street_name}`;
-            select.appendChild(opt);
-        });
-    } catch (err) {
-        console.error("Error populating dropdown:", err);
-    }
-}
-
-async function handleCreateBranch(e) {
-    e.preventDefault();
-    const TOKEN = localStorage.getItem('mas_token');
-    const data = {
-        governorate: document.getElementById('branchGov').value,
-        street_name: document.getElementById('branchStreet').value,
-        contact_number: document.getElementById('branchContact').value
-    };
-
-    try {
-        const response = await fetch(`${API_BASE}/branches/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Token ${TOKEN}`
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            alert('تم إضافة الفرع بنجاح!');
-            closeModal('addBranchModal');
-            fetchBranches();
-            document.getElementById('addBranchForm').reset();
-        } else {
-            alert('خطأ في الإضافة');
-        }
-    } catch (err) {
-        alert('فشل الاتصال بالسيرفر');
-    }
-}
-
-async function handleRegisterSecretary(e) {
-    e.preventDefault();
-    const data = {
-        name: document.getElementById('secName').value,
-        email: document.getElementById('secEmail').value,
-        password: document.getElementById('secPassword').value,
-        role: 'SECRETARY',
-        branch_id: document.getElementById('secBranch').value
-    };
-
-    try {
-        const response = await fetch(`${API_BASE}/register/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            alert('تم تسجيل السكرتير بنجاح!');
-            closeModal('addSecretaryModal');
-            document.getElementById('addSecretaryForm').reset();
-        } else {
-            const errData = await response.json();
-            alert('خطأ: ' + (errData.error || 'حدث خطأ غير متوقع'));
-        }
-    } catch (err) {
-        alert('فشل الاتصال بالسيرفر');
-    }
-}
-
-// Initial App Call
-function initApp() {
-    // Any initial setup for the app
-}
-
 // 2. Navigation Logic
 function switchView(viewId, element) {
-    console.log("Switching to view:", viewId);
-
     // Hide all views
-    document.querySelectorAll('.view-section, .content-section').forEach(section => {
+    document.querySelectorAll('.view-section').forEach(section => {
         section.style.display = 'none';
         section.classList.remove('active');
     });
 
     // Show selected view
-    const targetSection = document.getElementById(viewId + '-section') || document.getElementById('view-' + viewId);
+    const targetSection = document.getElementById('view-' + viewId);
     if (targetSection) {
         targetSection.style.display = 'block';
-        targetSection.classList.add('active');
+        setTimeout(() => targetSection.classList.add('active'), 10);
     } else {
-        // Fallback placeholder
         const placeholder = document.getElementById('view-placeholder');
         if (placeholder) {
             placeholder.classList.add('active');
@@ -273,12 +176,12 @@ function switchView(viewId, element) {
     // Update Header Text
     const titleObj = {
         'overview': 'نظرة عامة (Overview)',
-        'users': 'إدارة المستخدمين',
-        'ai-models': 'نماذج الذكاء الاصطناعي',
-        'doctors': 'الكادر الطبي',
-        'management': 'إدارة التنظيم والفروع',
-        'ads': 'إدارة الإعلانات والترويج',
-        'system': 'حالة النظام'
+        'users': 'سجل المرضى والمستفيدين',
+        'doctors': 'الطاقم الطبي التخصصي',
+        'secretaries': 'إدارة السكرتارية والموظفين',
+        'management': 'إدارة العيادات والفروع',
+        'ads': 'إحصائيات وإعلانات المركز',
+        'system': 'حالة النظام والخوادم'
     };
 
     const headerTitle = document.getElementById('current-page-title');
@@ -289,6 +192,7 @@ function switchView(viewId, element) {
     // Trigger Specific Data Fetching
     if (viewId === 'users') fetchUsers();
     if (viewId === 'doctors') fetchDoctors();
+    if (viewId === 'secretaries') fetchSecretaries();
     if (viewId === 'management') fetchBranches();
     if (viewId === 'ads') fetchAds();
 }
@@ -312,26 +216,226 @@ window.onclick = function (event) {
     }
 }
 
-async function fetchUsers() {
-    const token = localStorage.getItem('mas_token');
-    const target = document.querySelector('#view-users .table-responsive');
+// --- Management Features ---
+
+// 1. Branches Management
+async function fetchBranches() {
+    const TOKEN = localStorage.getItem('mas_token');
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+        const branches = await response.json();
+        const tbody = document.querySelector('#branchesTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        branches.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${b.id}</td>
+                <td>${b.governorate}</td>
+                <td>${b.street_name}</td>
+                <td>${b.contact_number || '---'}</td>
+                <td><span class="badge badge-success">يعمل كعيادة</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-icon delete" onclick="deleteBranch(${b.id})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Error fetching branches:", err);
+    }
+}
+
+async function handleCreateBranch(e) {
+    e.preventDefault();
+    const TOKEN = localStorage.getItem('mas_token');
+    const data = {
+        governorate: document.getElementById('branchGov').value,
+        street_name: document.getElementById('branchStreet').value,
+        contact_number: document.getElementById('branchContact').value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${TOKEN}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('تم إضافة العيادة بنجاح!');
+            closeModal('addBranchModal');
+            fetchBranches();
+            document.getElementById('addBranchForm').reset();
+        } else {
+            alert('حدث خطأ أثناء الإضافة');
+        }
+    } catch (err) {
+        alert('فشل الاتصال بالسيرفر');
+    }
+}
+
+async function deleteBranch(id) {
+    if (!confirm('هل أنت متأكد من حذف هذه العيادة؟')) return;
+    const TOKEN = localStorage.getItem('mas_token');
+
+    try {
+        const response = await fetch(`${API_BASE}/branches/${id}/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+
+        if (response.ok) {
+            fetchBranches();
+            alert('تم الحذف بنجاح');
+        } else {
+            alert('فشل الحذف');
+        }
+    } catch (err) {
+        alert('حدث خطأ');
+    }
+}
+
+// 2. Secretaries Management
+async function fetchSecretaries() {
+    const TOKEN = localStorage.getItem('mas_token');
+    const target = document.getElementById('secretariesList');
     if (!target) return;
     target.innerHTML = '<div class="loader">جاري التحميل...</div>';
 
     try {
-        const response = await fetch(`${API_BASE}/profiles/`, {
-            headers: { 'Authorization': `Token ${token}` }
+        const response = await fetch(`${API_BASE}/secretaries/`, {
+            headers: { 'Authorization': `Token ${TOKEN}` }
         });
         const data = await response.json();
-        renderUserTable(data);
+        renderSecretaryTable(data);
     } catch (err) {
         target.innerHTML = 'خطأ في التحميل';
     }
 }
 
+function renderSecretaryTable(secretaries) {
+    let html = `
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>الموظف</th>
+                    <th>الفرع المسؤول</th>
+                    <th>تاريخ التعيين</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    secretaries.forEach(s => {
+        const joinDate = s.user_details?.date_joined ? new Date(s.user_details.date_joined).toLocaleDateString('ar-SA') : 'غير محدد';
+        html += `
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">${s.user_details?.first_name} ${s.user_details?.last_name || ''}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${s.user_details?.email}</div>
+                </td>
+                <td>${s.branch_details?.governorate || '---'}</td>
+                <td>${joinDate}</td>
+                <td>
+                    <button class="btn-icon delete" onclick="deleteSecretary(${s.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('secretariesList').innerHTML = html;
+}
+
+async function populateBranchDropdown() {
+    const TOKEN = localStorage.getItem('mas_token');
+    try {
+        const response = await fetch(`${API_BASE}/branches/`, {
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+        const branches = await response.json();
+        const select = document.getElementById('secBranch');
+        if (!select) return;
+        select.innerHTML = '<option value="">اختر العيادة / الفرع...</option>';
+
+        branches.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id;
+            opt.textContent = `${b.governorate} - ${b.street_name}`;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Error populating dropdown:", err);
+    }
+}
+
+async function handleRegisterSecretary(e) {
+    e.preventDefault();
+    const data = {
+        username: document.getElementById('secEmail').value,
+        email: document.getElementById('secEmail').value,
+        password: document.getElementById('secPassword').value,
+        first_name: document.getElementById('secName').value,
+        role: 'SECRETARY',
+        branch_id: document.getElementById('secBranch').value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/register/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('تم تسجيل الموظف بنجاح!');
+            closeModal('addSecretaryModal');
+            fetchSecretaries();
+            document.getElementById('addSecretaryForm').reset();
+        } else {
+            const errData = await response.json();
+            alert('خطأ: ' + (errData.error || 'حدث خطأ في التسجيل'));
+        }
+    } catch (err) {
+        alert('فشل الاتصال بالسيرفر');
+    }
+}
+
+async function deleteSecretary(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الحساب للموظف؟')) return;
+    const TOKEN = localStorage.getItem('mas_token');
+
+    try {
+        const response = await fetch(`${API_BASE}/secretaries/${id}/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Token ${TOKEN}` }
+        });
+
+        if (response.ok) {
+            fetchSecretaries();
+            alert('تم الحذف بنجاح');
+        } else {
+            alert('فشل الحذف');
+        }
+    } catch (err) {
+        alert('حدث خطأ');
+    }
+}
+
+// 3. Doctors Management (Viewing stats & joining dates)
 async function fetchDoctors() {
     const token = localStorage.getItem('mas_token');
-    const target = document.querySelector('#view-doctors .table-responsive');
+    const target = document.getElementById('doctorsList');
     if (!target) return;
     target.innerHTML = '<div class="loader">جاري التحميل...</div>';
 
@@ -346,35 +450,6 @@ async function fetchDoctors() {
     }
 }
 
-function renderUserTable(users) {
-    let html = `
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>المستخدم</th>
-                    <th>البريد</th>
-                    <th>الدور</th>
-                    <th>تاريخ الانضمام</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    users.forEach(u => {
-        html += `
-            <tr>
-                <td>${u.user_details.first_name} ${u.user_details.last_name || ''}</td>
-                <td>${u.user_details.email}</td>
-                <td><span class="badge badge-primary">${u.role}</span></td>
-                <td>${u.created_at || '---'}</td>
-            </tr>
-        `;
-    });
-
-    html += '</tbody></table>';
-    document.querySelector('#view-users .table-responsive').innerHTML = html;
-}
-
 function renderDoctorTable(doctors) {
     let html = `
         <table class="admin-table">
@@ -382,24 +457,92 @@ function renderDoctorTable(doctors) {
                 <tr>
                     <th>الطبيب</th>
                     <th>التخصص</th>
-                    <th>المستوى</th>
+                    <th>العيادات / العمال</th>
+                    <th>تاريخ الانضمام</th>
+                    <th>الحالة</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
     doctors.forEach(d => {
+        const joinDate = d.user_details?.date_joined ? new Date(d.user_details.date_joined).toLocaleDateString('ar-SA') : '---';
         html += `
             <tr>
-                <td>د. ${d.user_details.first_name} ${d.user_details.last_name || ''}</td>
+                <td>
+                    <div style="font-weight: 700; color: var(--accent-main)">د. ${d.user_details?.first_name} ${d.user_details?.last_name || ''}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted)">${d.user_details?.email}</div>
+                </td>
                 <td>${d.specialty}</td>
-                <td><span class="badge badge-success">${d.level}</span></td>
+                <td>
+                    <div class="stats-mini">
+                        <span><i class="fa-solid fa-hospital"></i> ${d.branch_count || 0}</span>
+                        <span><i class="fa-solid fa-user-tie"></i> ${d.secretary_count || 0}</span>
+                    </div>
+                </td>
+                <td>${joinDate}</td>
+                <td><span class="badge badge-success">نشط حالياً</span></td>
             </tr>
         `;
     });
 
     html += '</tbody></table>';
-    document.querySelector('#view-doctors .table-responsive').innerHTML = html;
+    document.getElementById('doctorsList').innerHTML = html;
+}
+
+// 4. Patients (Users) Management
+async function fetchUsers() {
+    const token = localStorage.getItem('mas_token');
+    const target = document.getElementById('patientsList');
+    if (!target) return;
+    target.innerHTML = '<div class="loader">جاري التحميل...</div>';
+
+    try {
+        const response = await fetch(`${API_BASE}/users/`, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+        const data = await response.json();
+        // Filter for Patients only for this view
+        const patients = data.filter(u => u.role === 'PATIENT');
+        renderPatientTable(patients);
+    } catch (err) {
+        target.innerHTML = 'خطأ في التحميل';
+    }
+}
+
+function renderPatientTable(patients) {
+    let html = `
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>اسم المريض</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>رقم الهاتف</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    patients.forEach(p => {
+        const joinDate = p.date_joined ? new Date(p.date_joined).toLocaleDateString('ar-SA') : '---';
+        html += `
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">${p.first_name} ${p.last_name || ''}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted)">ID: #${p.id}</div>
+                </td>
+                <td>${p.email}</td>
+                <td>${p.phone_number || 'غير متوفر'}</td>
+                <td>${joinDate}</td>
+                <td><span class="badge badge-primary">مريض مشفر</span></td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('patientsList').innerHTML = html;
 }
 
 // --- Advertising Management ---

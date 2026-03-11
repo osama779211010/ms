@@ -33,53 +33,69 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar glass-panel">
             <div class="sidebar-header">
-                <div class="logo-circle">
+                <div class="logo-circle" style="background: rgba(176, 0, 73, 0.1);">
                     <img src="../assets/image/MAS.png" alt="MAS Logo" class="rotating-mas">
                 </div>
-                <h2>MAS <span>Admin</span></h2>
+                <h2 style="font-size: 1.2rem;">MAS <span>MEDICAL HUB</span></h2>
             </div>
 
             <nav class="sidebar-nav">
+                <div class="nav-label"
+                    style="padding: 0.5rem 1.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                    الرئيسية</div>
                 <a href="#" class="nav-item active" onclick="switchView('overview', this)">
                     <i class="fa-solid fa-chart-pie"></i>
                     <span>نظرة عامة</span>
                 </a>
-                <a href="#" class="nav-item" onclick="switchView('users', this)">
-                    <i class="fa-solid fa-users"></i>
-                    <span>إدارة المستخدمين</span>
-                </a>
-                <a href="#" class="nav-item" onclick="switchView('ai-models', this)">
-                    <i class="fa-solid fa-brain"></i>
-                    <span>نماذج الذكاء الاصطناعي</span>
+
+                <div class="nav-label"
+                    style="padding: 1.5rem 1.5rem 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                    الإدارة الطبية</div>
+                <a href="#" class="nav-item" onclick="switchView('management', this)">
+                    <i class="fa-solid fa-hospital"></i>
+                    <span>العيادات والفروع</span>
                 </a>
                 <a href="#" class="nav-item" onclick="switchView('doctors', this)">
                     <i class="fa-solid fa-user-doctor"></i>
-                    <span>الكادر الطبي</span>
+                    <span>الأطباء المتخصصون</span>
                 </a>
-                <a href="#" class="nav-item" onclick="switchView('management', this)">
-                    <i class="fa-solid fa-building-ngo"></i>
-                    <span>إدارة الفروع</span>
+                <a href="#" class="nav-item" onclick="switchView('users', this)">
+                    <i class="fa-solid fa-hospital-user"></i>
+                    <span>سجل المرضى</span>
                 </a>
+
+                <div class="nav-label"
+                    style="padding: 1.5rem 1.5rem 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                    إدارة الموظفين</div>
+                <a href="#" class="nav-item" onclick="switchView('secretaries', this)">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>السكرتارية</span>
+                </a>
+
+                <div class="nav-label"
+                    style="padding: 1.5rem 1.5rem 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                    النظام</div>
                 <a href="#" class="nav-item" id="nav-ads" onclick="switchView('ads', this)">
-                    <i class="fa-solid fa-rectangle-ad"></i>
-                    <span>إدارة الإعلانات</span>
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>إحصائيات وإعلانات</span>
                 </a>
                 <a href="#" class="nav-item" onclick="switchView('system', this)">
-                    <i class="fa-solid fa-server"></i>
-                    <span>حالة النظام</span>
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>حالة الخادم</span>
                 </a>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <div class="avatar">م</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, var(--accent-main), #ff4d8d);">م
+                    </div>
                     <div class="details">
                         <span class="name">المدير العام</span>
                         <span class="role">Admin Console</span>
                     </div>
                 </div>
                 <a href="javascript:void(0)" class="logout-btn" onclick="logout()">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <i class="fa-solid fa-power-off"></i>
                 </a>
             </div>
         </aside>
@@ -111,46 +127,46 @@
                 <!-- Stat Cards Row -->
                 <div class="stats-grid">
                     <div class="stat-card glass-panel wow-card">
-                        <div class="stat-icon" style="color: #00d4ff; background: rgba(0, 212, 255, 0.1);">
-                            <i class="fa-solid fa-users"></i>
+                        <div class="stat-icon" style="color: var(--accent-main); background: rgba(176, 0, 73, 0.1);">
+                            <i class="fa-solid fa-user-md"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>إجمالي المستخدمين</h3>
-                            <div class="value">12,450</div>
-                            <div class="trend positive"><i class="fa-solid fa-arrow-up"></i> +12% هذا الأسبوع</div>
+                            <h3>بإجمالي الأطباء</h3>
+                            <div class="value" id="stat-total-doctors">0</div>
+                            <div class="trend positive"><i class="fa-solid fa-plus"></i> متخصصون معتمدون</div>
                         </div>
                     </div>
 
                     <div class="stat-card glass-panel wow-card">
                         <div class="stat-icon" style="color: #00ffaa; background: rgba(0, 255, 170, 0.1);">
-                            <i class="fa-solid fa-chart-line"></i>
+                            <i class="fa-solid fa-notes-medical"></i>
                         </div>
                         <div class="stat-details">
                             <h3>تشخيصات اليوم</h3>
-                            <div class="value">342</div>
-                            <div class="trend positive"><i class="fa-solid fa-arrow-up"></i> +5% معدل نشاط</div>
+                            <div class="value" id="stat-diagnoses">0</div>
+                            <div class="trend positive"><i class="fa-solid fa-pulse"></i> معدل استجابة حي</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel wow-card">
+                        <div class="stat-icon" style="color: #ffcc00; background: rgba(255, 204, 0, 0.1);">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3>دقة الـ AI الحالية</h3>
+                            <div class="value" id="stat-accuracy">98.5%</div>
+                            <div class="trend stable"><i class="fa-solid fa-check-double"></i> أداء مستقر</div>
                         </div>
                     </div>
 
                     <div class="stat-card glass-panel wow-card">
                         <div class="stat-icon" style="color: #bc00dd; background: rgba(188, 0, 221, 0.1);">
-                            <i class="fa-solid fa-brain"></i>
-                        </div>
-                        <div class="stat-details">
-                            <h3>دقة الـ AI الحالية</h3>
-                            <div class="value">98.5%</div>
-                            <div class="trend stable"><i class="fa-solid fa-minus"></i> مستقر</div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card glass-panel wow-card">
-                        <div class="stat-icon" style="color: #ff3366; background: rgba(255, 51, 102, 0.1);">
                             <i class="fa-solid fa-server"></i>
                         </div>
                         <div class="stat-details">
-                            <h3>ضغط السيرفر</h3>
-                            <div class="value">42%</div>
-                            <div class="trend warning"><i class="fa-solid fa-bolt"></i> طبيعي</div>
+                            <h3>حالة الخادم</h3>
+                            <div class="value">99.9%</div>
+                            <div class="trend positive"><i class="fa-solid fa-shield-halved"></i> محمي بالكامل</div>
                         </div>
                     </div>
                 </div>
@@ -161,7 +177,7 @@
                     <!-- Main Chart -->
                     <div class="chart-container glass-panel wow-card">
                         <div class="card-header">
-                            <h2><i class="fa-solid fa-activity"></i> نشاط النظام والتشخيصات (أسبوعياً)</h2>
+                            <h2><i class="fa-solid fa-wave-square"></i> نشاط المركز الطبي (أسبوعياً)</h2>
                             <select class="glass-select">
                                 <option>هذا الأسبوع</option>
                                 <option>هذا الشهر</option>
@@ -175,13 +191,13 @@
                     <!-- AI Models Health -->
                     <div class="ai-health-container glass-panel wow-card">
                         <div class="card-header">
-                            <h2><i class="fa-solid fa-microchip"></i> صحة النماذج (AI Models)</h2>
+                            <h2><i class="fa-solid fa-brain"></i> كفاءة نماذج التشخيص</h2>
                         </div>
                         <div class="health-bars">
 
                             <div class="health-item">
                                 <div class="health-info">
-                                    <span>PneumoniaNet v2 (أشعة الصدر)</span>
+                                    <span>PneumoniaNet (أشعة الصدر)</span>
                                     <span class="percent" style="color:#00ffaa">99%</span>
                                 </div>
                                 <div class="progress-track" style="--val: 99%; --color: #00ffaa">
@@ -192,9 +208,9 @@
                             <div class="health-item">
                                 <div class="health-info">
                                     <span>BraTS Analyzer (أورام الدماغ)</span>
-                                    <span class="percent" style="color:#00d4ff">97%</span>
+                                    <span class="percent" style="color:var(--accent-main)">97%</span>
                                 </div>
-                                <div class="progress-track" style="--val: 97%; --color: #00d4ff">
+                                <div class="progress-track" style="--val: 97%; --color: var(--accent-main)">
                                     <div class="progress-fill"></div>
                                 </div>
                             </div>
@@ -293,13 +309,13 @@
                 </div>
             </section>
 
-            <!-- ### VIEW: USERS ### -->
+            <!-- ### VIEW: PATIENTS (USERS) ### -->
             <section id="view-users" class="view-section" style="display: none;">
                 <div class="table-container glass-panel wow-card full-width">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-users"></i> قائمة المستخدمين المسجلين</h2>
+                        <h2><i class="fa-solid fa-hospital-user"></i> سجل المرضى والمستخدمين</h2>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="patientsList">
                         <!-- Loaded via AJAX -->
                     </div>
                 </div>
@@ -309,51 +325,63 @@
             <section id="view-doctors" class="view-section" style="display: none;">
                 <div class="table-container glass-panel wow-card full-width">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-user-doctor"></i> الطاقم الطبي المعتمد</h2>
+                        <h2><i class="fa-solid fa-user-md"></i> الطاقم الطبي والاستشاريين</h2>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="doctorsList">
                         <!-- Loaded via AJAX -->
                     </div>
                 </div>
             </section>
 
-            <!-- ### VIEW: AI MODELS ### -->
-            <section id="view-ai-models" class="view-section" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-card glass-panel wow-card">
-                        <div class="stat-details">
-                            <h3>Pneumonia V2</h3>
-                            <div class="value">99%</div>
-                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
-                        </div>
+            <!-- ### VIEW: SECRETARIES ### -->
+            <section id="view-secretaries" class="view-section" style="display: none;">
+                <div class="table-container glass-panel wow-card full-width">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-user-tie"></i> إدارة السكرتارية والموظفين</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addSecretaryModal')"
+                            style="width: auto; padding: 0.6rem 1.2rem;">
+                            <i class="fa-solid fa-plus"></i> تسجيل سكرتير
+                        </button>
                     </div>
-                    <div class="stat-card glass-panel wow-card">
-                        <div class="stat-details">
-                            <h3>Brain Tumor</h3>
-                            <div class="value">97%</div>
-                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
-                        </div>
+                    <div class="table-responsive" id="secretariesList">
+                        <!-- Loaded via AJAX -->
                     </div>
-                    <div class="stat-card glass-panel wow-card">
-                        <div class="stat-details">
-                            <h3>Skin Cancer</h3>
-                            <div class="value">92%</div>
-                            <p style="font-size: 0.8rem; opacity: 0.6;">دقة التشخيص الحالية</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel wow-card" style="margin-top: 2rem; padding: 2rem;">
-                    <h2>حالات النماذج الفنية</h2>
-                    <p>جميع النماذج تعمل على خوادم TFLite المحسنة للجوال والويب.</p>
                 </div>
             </section>
 
-            <!-- ### VIEW: AD MANAGEMENT ### -->
+            <!-- ### VIEW: BRANCHES (MANAGEMENT) ### -->
+            <section id="view-management" class="view-section" style="display: none;">
+                <div class="glass-panel wow-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-hospital"></i> تنظيم الفروع والعيادات</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addBranchModal')"
+                            style="width: auto; padding: 0.6rem 1.2rem;">
+                            <i class="fa-solid fa-plus"></i> إضافة عيادة جديدة
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table" id="branchesTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>المحافظة</th>
+                                    <th>العنوان / الشارع</th>
+                                    <th>رقم التواصل</th>
+                                    <th>الحالة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ### VIEW: ADS ### -->
             <section id="view-ads" class="view-section" style="display: none;">
                 <div class="glass-panel wow-card">
                     <div class="card-header">
-                        <h2><i class="fa-solid fa-rectangle-ad"></i> التحكم بالإعلانات المتحركة</h2>
+                        <h2><i class="fa-solid fa-bullhorn"></i> إحصائيات وإعلانات المركز</h2>
                         <button class="btn btn-primary btn-sm" onclick="openModal('addAdModal')"
                             style="width: auto; padding: 0.6rem 1.2rem;">
                             <i class="fa-solid fa-plus"></i> إضافة إعلان جديد
@@ -382,9 +410,9 @@
                 <div class="glass-panel" style="padding: 4rem; text-align: center;">
                     <i class="fa-solid fa-server"
                         style="font-size: 4rem; color: var(--accent-light); margin-bottom: 2rem;"></i>
-                    <h2>نظام MAS قيد التشغيل</h2>
-                    <p style="color: var(--text-muted);">جميع الخدمات تعمل بشكل طبيعي. دقة نماذج الذكاء الاصطناعي
-                        مستقرة.</p>
+                    <h2>خوادم MAS الطبية قيد التشغيل</h2>
+                    <p style="color: var(--text-muted);">جميع الخدمات تعمل بكفاءة عالية. تشفير البيانات مفعل بالكامل.
+                    </p>
                 </div>
             </section>
 
@@ -406,21 +434,24 @@
     <div id="addBranchModal" class="modal">
         <div class="modal-content glass-panel">
             <span class="close" onclick="closeModal('addBranchModal')">&times;</span>
-            <h3><i class="fa-solid fa-building-circle-plus"></i> إضافة فرع جديد</h3>
+            <h3 style="color: var(--accent-main);"><i class="fa-solid fa-clinic-medical"></i> إضافة عيادة / فرع جديد
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">أدخل تفاصيل الموقع الجغرافي
+                للعيادة الجديدة.</p>
             <form id="addBranchForm" onsubmit="handleCreateBranch(event)">
                 <div class="input-group">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                    <input type="text" id="branchGov" placeholder="المحافظة / المدينة" required>
+                    <i class="fa-solid fa-city"></i>
+                    <input type="text" id="branchGov" placeholder="المحافظة" required>
                 </div>
                 <div class="input-group">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <input type="text" id="branchStreet" placeholder="اسم الشارع / الحي" required>
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                    <input type="text" id="branchStreet" placeholder="اسم الشارع بالتفصيل" required>
                 </div>
                 <div class="input-group">
                     <i class="fa-solid fa-phone"></i>
-                    <input type="text" id="branchContact" placeholder="رقم هاتف الفرع">
+                    <input type="text" id="branchContact" placeholder="رقم هاتف التواصل">
                 </div>
-                <button type="submit" class="btn btn-primary w-100">حفظ الفرع</button>
+                <button type="submit" class="btn btn-primary w-100">حفظ وحفظ الفرع</button>
             </form>
         </div>
     </div>
@@ -428,7 +459,9 @@
     <div id="addSecretaryModal" class="modal">
         <div class="modal-content glass-panel">
             <span class="close" onclick="closeModal('addSecretaryModal')">&times;</span>
-            <h3><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h3>
+            <h3 style="color: var(--accent-main);"><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">يرجى تزويد بيانات الدخول
+                واختيار الفرع المسؤول عنه.</p>
             <form id="addSecretaryForm" onsubmit="handleRegisterSecretary(event)">
                 <div class="input-group">
                     <i class="fa-solid fa-user"></i>

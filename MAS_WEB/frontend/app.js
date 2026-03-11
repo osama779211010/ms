@@ -66,6 +66,20 @@ function displayUserInfo() {
             // Welcome message in navbar
             const subtitleEl = document.querySelector('.page-subtitle');
             if (subtitleEl) subtitleEl.innerText = `مرحباً بك في مركز التحكم الموحد لـ MAS MEDICAL HUB.`;
+
+            // Role based menu trimming: Hide Doctors and Management views for Doctor role
+            if (user.role === 'DOCTOR') {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const clickAttr = item.getAttribute('onclick');
+                    if (clickAttr && (clickAttr.includes("'doctors'") || clickAttr.includes("'management'") || clickAttr.includes("'secretaries'"))) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            // Capture Browser Device Info
+            const browserInfo = navigator.userAgent.split(') ')[0].split(' (')[1] || 'Web Dashboard';
+            localStorage.setItem('mas_last_device', browserInfo);
         } catch (e) {
             console.error("Error parsing user data", e);
         }

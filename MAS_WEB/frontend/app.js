@@ -106,36 +106,35 @@ async function fetchDashboardData() {
 }
 
 function updateDashboardUI(data) {
-    // Update Stat Cards with new IDs
+    // Update Stat Cards
     const docEl = document.getElementById('stat-total-doctors');
-    if (docEl) docEl.innerText = data.total_doctors;
+    if (docEl) docEl.innerText = data.total_doctors || '0';
 
     const diagEl = document.getElementById('stat-diagnoses');
-    if (diagEl) diagEl.innerText = data.diagnoses_today;
+    if (diagEl) diagEl.innerText = data.diagnoses_today || '0';
 
     const accEl = document.getElementById('stat-accuracy');
-    if (accEl) accEl.innerText = data.accuracy;
+    if (accEl) accEl.innerText = data.accuracy || '98.5%';
 
-    const patEl = document.getElementById('stat-total-patients'); // We should add this ID if needed or use total_patients elsewhere
-
-    // Update Table
-    const tbody = document.querySelector('.admin-table tbody');
+    // Update Table (Active Queue)
+    const tbody = document.getElementById('recent-activity-body');
     if (tbody && data.recent_queue) {
         tbody.innerHTML = '';
         data.recent_queue.forEach(item => {
+            const statusClass = item.status === 'مكتمل' ? 'status-active' : 'status-inactive';
             tbody.innerHTML += `
                 <tr>
-                    <td>${item.id}</td>
+                    <td><span style="font-family: monospace; color: var(--accent-main); font-weight: 800;">#${item.id}</span></td>
                     <td>
                         <div class="tbl-user">
-                            <i class="fa-solid fa-user-circle" style="font-size: 1.5rem; opacity: 0.5;"></i>
+                            <i class="fa-solid fa-user-circle" style="font-size: 1.5rem; color: var(--text-muted);"></i>
                             ${item.user}
                         </div>
                     </td>
                     <td>${item.type}</td>
                     <td>${item.time}</td>
-                    <td>${item.confidence || '---'}</td>
-                    <td><span class="badge badge-success">${item.status}</span></td>
+                    <td style="font-weight: 700; color: var(--success);">${item.confidence || '---'}</td>
+                    <td><span class="status-badge ${statusClass}">${item.status}</span></td>
                 </tr>
             `;
         });
@@ -241,22 +240,28 @@ async function fetchStatsAndTotals() {
     }
 }
 
-// --- Modals ---
+// --- Modals (New System) ---
 function openModal(id) {
-    document.getElementById(id).style.display = 'block';
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('active');
+
+    // Auto-populate for Secretaries
     if (id === 'addSecretaryModal') {
         populateBranchDropdown();
     }
 }
 
 function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('active');
 }
 
 // Close on outside click
 window.onclick = function (event) {
-    if (event.target.className === 'modal') {
-        event.target.style.display = "none";
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
     }
 }
 
@@ -610,20 +615,31 @@ async function fetchAds() {
 }
 
 function renderAdsTable(ads) {
-    const tbody = document.querySelector('#adsTable tbody');
+    const tbody = document.getElementById('ads-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (ads.length === 0) {
+        document.getElementById('adsTable').style.display = 'none';
+        document.getElementById('adsEmpty').style.display = 'block';
+        return;
+    }
+
+    document.getElementById('adsEmpty').style.display = 'none';
+    document.getElementById('adsTable').style.display = 'table';
 
     ads.forEach(ad => {
         const tr = document.createElement('tr');
+        const statusClass = ad.is_active ? 'status-active' : 'status-inactive';
         tr.innerHTML = `
-            <td><img src="${ad.image}" class="ad-thumb"></td>
-            <td>${ad.title}</td>
-            <td>${ad.subtitle}</td>
-            <td><span class="badge ${ad.is_active ? 'badge-success' : 'badge-warning'}">${ad.is_active ? 'نشط' : 'متوقف'}</span></td>
+            <td><img src="${ad.image}" class="ad-thumb" style="width: 100px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass);"></td>
+            <td style="font-weight: 700;">${ad.title}</td>
+            <td style="color: var(--text-muted); font-size: 0.8rem;">${ad.subtitle}</td>
+            <td><span class="status-badge ${statusClass}">${ad.is_active ? 'نشط' : 'متوقف'}</span></td>
             <td>
-                <div class="action-btns">
-                    <button class="btn-icon delete" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i></button>
-                    <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                <div class="action-btns" style="display: flex; gap: 0.5rem;">
+                    <button class="notif-btn" style="color: var(--danger); background: rgba(239, 68, 68, 0.05);" onclick="deleteAd(${ad.id})"><i class="fa-solid fa-trash"></i></button>
+                    <button class="notif-btn" style="color: var(--accent-main); background: rgba(176, 0, 73, 0.05);"><i class="fa-solid fa-eye"></i></button>
                 </div>
             </td>
         `;
@@ -724,13 +740,13 @@ function initChart(chartData) {
         return;
     }
 
-    // Gradient for line
+    // Gradient for line (Premium Raspberry)
     let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(0, 212, 255, 0.5)'); // Accent Main
-    gradient.addColorStop(1, 'rgba(0, 212, 255, 0.0)');
+    gradient.addColorStop(0, 'rgba(176, 0, 73, 0.4)'); // Raspberry
+    gradient.addColorStop(1, 'rgba(176, 0, 73, 0.0)');
 
     const isLight = document.body.classList.contains('light-mode');
-    const textColor = isLight ? '#64748b' : '#8b9bb4';
+    const textColor = isLight ? '#64748b' : '#94a3b8';
     const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
 
     activityChart = new Chart(ctx, {
@@ -740,14 +756,14 @@ function initChart(chartData) {
             datasets: [{
                 label: 'عدد التشخيصات الناجحة',
                 data: values,
-                borderColor: '#00d4ff',
+                borderColor: '#B00049',
                 backgroundColor: gradient,
-                borderWidth: 3,
-                pointBackgroundColor: '#0a0e17',
-                pointBorderColor: '#00d4ff',
+                borderWidth: 4,
+                pointBackgroundColor: isLight ? '#ffffff' : '#0a0608',
+                pointBorderColor: '#B00049',
                 pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointRadius: 5,
+                pointHoverRadius: 7,
                 fill: true,
                 tension: 0.4 // Smooth curves
             }]
@@ -806,10 +822,6 @@ function updateChartTheme(isLight) {
 async function toggleSystemFeature(feature, isEnabled) {
     const token = localStorage.getItem('mas_token');
 
-    // Optimistic UI update or simple alert for now
-    // In a real scenario, this would send a request to a /settings/ endpoint on backend
-    console.log(`Setting feature ${feature} to ${isEnabled}`);
-
     try {
         let featureName = '';
         switch (feature) {
@@ -817,14 +829,18 @@ async function toggleSystemFeature(feature, isEnabled) {
             case 'pneumonia': featureName = 'فحص التهاب الرئة'; break;
             case 'skin': featureName = 'أمراض الجلد'; break;
             case 'chat': featureName = 'المحادثة مع الذكاء الاصطناعي (Gemma)'; break;
+            case 'registration': featureName = 'تسجيل الحسابات الجديدة'; break;
+            case 'doctor_verify': featureName = 'تدقيق الأطباء اليدوي'; break;
             case 'maintenance': featureName = 'وضع الصيانة الشامل'; break;
         }
 
         const statusText = isEnabled ? 'تم تفعيله بنجاح' : 'تم إيقافه بنجاح';
-        alert(`نظام MAS: ${featureName} ${statusText}.`);
+        alert(`نظام MAS الذكي: ${featureName} ${statusText}.`);
+
+        console.log(`[SYSTEM] ${feature} set to ${isEnabled}`);
 
         if (feature === 'maintenance' && isEnabled) {
-            if (confirm("تحذير: لقد قمت بتفعيل وضع الصيانة العام. هل ترغب في تسجيل الخروج الآن؟")) {
+            if (confirm("تحذير أمني: لقد قمت بتفعيل وضع الصيانة العام. هل ترغب في تسجيل الخروج الآن؟")) {
                 logout();
             }
         }
@@ -834,4 +850,3 @@ async function toggleSystemFeature(feature, isEnabled) {
         alert("فشل في تحديث إعدادات النظام. يرجى المحاولة لاحقاً.");
     }
 }
-

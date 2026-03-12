@@ -1,0 +1,24 @@
+<div class="glass-panel wow-card">
+    <div class="card-header">
+        <h2><i class="fa-solid fa-bullhorn"></i> إحصائيات وإعلانات المركز</h2>
+        <button class="btn btn-primary btn-sm" onclick="openModal('addAdModal')"
+            style="width: auto; padding: 0.6rem 1.2rem;">
+            <i class="fa-solid fa-plus"></i> إضافة إعلان جديد
+        </button>
+    </div>
+    <div class="table-responsive">
+        <div class="loader" id="adsLoader">جاري التحميل...</div>
+        <table class="admin-table" id="adsTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>العنوان</th>
+                    <th>النص الفرعي</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>

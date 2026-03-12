@@ -1,0 +1,85 @@
+<div class="glass-panel" style="padding: 4rem; text-align: center;">
+    <i class="fa-solid fa-server" style="font-size: 4rem; color: var(--accent-light); margin-bottom: 2rem;"></i>
+    <h2>لوحة التحكم المتقدمة للنظام</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">تحكم كامل بإيقاف/تشغيل مزايا التطبيق والذكاء الاصطناعي
+        بشكل فوري.</p>
+
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; text-align: right;">
+
+        <!-- Toggle 1 -->
+        <div class="glass-panel"
+            style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;"><i class="fa-solid fa-brain"
+                        style="color: var(--accent-main)"></i> فحص الأورام الدماغية</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">تفعيل أو إيقاف السماح للمرضى بإجراء هذا الفحص
+                </div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleSystemFeature('brats', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Toggle 2 -->
+        <div class="glass-panel"
+            style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;"><i class="fa-solid fa-lungs"
+                        style="color: #00ffaa"></i> فحص التهاب الرئة</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">تفعيل أو إيقاف استقبال صور الأشعة الصدرية
+                </div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleSystemFeature('pneumonia', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Toggle 3 -->
+        <div class="glass-panel"
+            style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;"><i class="fa-solid fa-hand-dots"
+                        style="color: #ffcc00"></i> فحص الأمراض الجلدية</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">حالة وحدة تحليل سرطان/أمراض الجلد</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleSystemFeature('skin', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Toggle 4 -->
+        <div class="glass-panel"
+            style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;"><i class="fa-regular fa-comments"
+                        style="color: #bc00dd"></i> المساعد الطبي (Gemma)</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">إيقاف المحادثة التفاعلية مع الذكاء الاصطناعي
+                </div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleSystemFeature('chat', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Toggle 5 -->
+        <div class="glass-panel"
+            style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 0, 0, 0.2);">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #ff4d4d;"><i
+                        class="fa-solid fa-power-off"></i> وضع الصيانة الشامل</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">إيقاف التطبيق كاملاً للمستخدمين وإظهار رسالة
+                    صيانة</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" onchange="toggleSystemFeature('maintenance', this.checked)">
+                <span class="slider" style="background-color: var(--surface-light)"></span>
+            </label>
+        </div>
+
+    </div>
+</div>

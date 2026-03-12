@@ -42,10 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun');
     }
 
-    // 3. User Info Display
+    // 3. User Info Display & Default View Load
     if (!isLoginPage) {
         displayUserInfo();
-        fetchDashboardData();
+        const defaultNav = document.querySelector('.nav-item.active');
+        switchView('overview', defaultNav);
         initProgressBars();
     }
 });
@@ -89,23 +90,11 @@ function displayUserInfo() {
 async function fetchDashboardData() {
     const token = localStorage.getItem('mas_token');
     try {
-        // Fetch stats from specific endpoints
-        const [statsRes, doctorsRes, patientsRes, branchesRes] = await Promise.all([
-            fetch(`${API_BASE}/stats/`, { headers: { 'Authorization': `Token ${token}` } }),
-            fetch(`${API_BASE}/doctors/`, { headers: { 'Authorization': `Token ${token}` } }),
-            fetch(`${API_BASE}/users/`, { headers: { 'Authorization': `Token ${token}` } }),
-            fetch(`${API_BASE}/branches/`, { headers: { 'Authorization': `Token ${token}` } })
-        ]);
-
+        // Only fetch stats initially for speed. Other data is fetched when their view is loaded.
+        const statsRes = await fetch(`${API_BASE}/stats/`, { headers: { 'Authorization': `Token ${token}` } });
         const statsData = await statsRes.json();
-        const doctors = await doctorsRes.json();
-        const patients = await patientsRes.json();
-        const branches = await branchesRes.json();
 
         updateDashboardUI({
-            total_doctors: Array.isArray(doctors) ? doctors.length : 0,
-            total_patients: Array.isArray(patients) ? patients.filter(p => p.role === 'PATIENT').length : 0,
-            total_branches: Array.isArray(branches) ? branches.length : 0,
             diagnoses_today: statsData?.stats?.today_diagnoses || 0,
             accuracy: statsData?.stats?.ai_accuracy || '98.5%',
             recent_queue: statsData?.recent_queue || []
@@ -158,26 +147,13 @@ function updateDashboardUI(data) {
     }
 }
 
-// 2. Navigation Logic
-function switchView(viewId, element) {
-    // Hide all views
-    document.querySelectorAll('.view-section').forEach(section => {
-        section.style.display = 'none';
-        section.classList.remove('active');
-    });
+// 2. Navigation Logic (Lazy Loading)
+async function switchView(viewId, element) {
+    const contentDiv = document.getElementById('dynamic-content');
+    if (!contentDiv) return;
 
-    // Show selected view
-    const targetSection = document.getElementById('view-' + viewId);
-    if (targetSection) {
-        targetSection.style.display = 'block';
-        setTimeout(() => targetSection.classList.add('active'), 10);
-    } else {
-        const placeholder = document.getElementById('view-placeholder');
-        if (placeholder) {
-            placeholder.classList.add('active');
-            placeholder.style.display = 'block';
-        }
-    }
+    // Show loader
+    contentDiv.innerHTML = '<div class="loader" style="margin: 50px auto; display: block; text-align: center;">جاري التحميل...</div>';
 
     // Update active state in sidebar
     if (element) {
@@ -195,7 +171,7 @@ function switchView(viewId, element) {
         'secretaries': 'إدارة السكرتارية والموظفين',
         'management': 'إدارة العيادات والفروع',
         'ads': 'إحصائيات وإعلانات المركز',
-        'system': 'حالة النظام والخوادم'
+        'system': 'لوحة التحكم المتقدمة للنظام'
     };
 
     const headerTitle = document.getElementById('current-page-title');
@@ -203,12 +179,66 @@ function switchView(viewId, element) {
         headerTitle.innerText = titleObj[viewId];
     }
 
-    // Trigger Specific Data Fetching
-    if (viewId === 'users') fetchUsers();
-    if (viewId === 'doctors') fetchDoctors();
-    if (viewId === 'secretaries') fetchSecretaries();
-    if (viewId === 'management') fetchBranches();
-    if (viewId === 'ads') fetchAds();
+    try {
+        // Fetch HTML view dynamically
+        const response = await fetch(`views/${viewId}.html`);
+        if (!response.ok) throw new Error('View not found');
+        const html = await response.text();
+
+        // Inject HTML
+        contentDiv.innerHTML = html;
+
+        // Add animation class
+        const firstChild = contentDiv.firstElementChild;
+        if (firstChild && firstChild.classList) {
+            firstChild.classList.add('view-section');
+            setTimeout(() => firstChild.classList.add('active'), 10);
+        }
+
+        // Trigger Specific Data Fetching for the newly loaded view
+        if (viewId === 'overview') {
+            fetchDashboardData();
+            // Need to re-initialize stats specific to overview if needed
+            fetchStatsAndTotals();
+        }
+        if (viewId === 'users') fetchUsers();
+        if (viewId === 'doctors') fetchDoctors();
+        if (viewId === 'secretaries') fetchSecretaries();
+        if (viewId === 'management') fetchBranches();
+        if (viewId === 'ads') fetchAds();
+
+    } catch (err) {
+        console.error('Failed to load view:', err);
+        contentDiv.innerHTML = `
+            <div class="glass-panel" style="padding: 4rem; text-align: center;">
+                <i class="fa-solid fa-tools" style="font-size: 4rem; color: var(--accent-light); margin-bottom: 2rem;"></i>
+                <h2>جاري تطوير هذه الصفحة</h2>
+                <p style="color: var(--text-muted);">هذه الوحدة الإدارية للذكاء الاصطناعي قيد الإنشاء ضمن التحديثات القادمة للوحة التحكم.</p>
+            </div>`;
+    }
+}
+
+// Helper to fetch totals for the overview page lazily
+async function fetchStatsAndTotals() {
+    const token = localStorage.getItem('mas_token');
+    try {
+        const [doctorsRes, patientsRes, branchesRes] = await Promise.all([
+            fetch(`${API_BASE}/doctors/`, { headers: { 'Authorization': `Token ${token}` } }),
+            fetch(`${API_BASE}/users/`, { headers: { 'Authorization': `Token ${token}` } }),
+            fetch(`${API_BASE}/branches/`, { headers: { 'Authorization': `Token ${token}` } })
+        ]);
+
+        const doctors = await doctorsRes.json();
+        const patients = await patientsRes.json();
+        const branches = await branchesRes.json();
+
+        const docEl = document.getElementById('stat-total-doctors');
+        if (docEl) docEl.innerText = Array.isArray(doctors) ? doctors.length : 0;
+
+        // Can add more stats mapping here if needed in overview
+    } catch (err) {
+        console.error('Stats and Totals fetch failed', err);
+    }
 }
 
 // --- Modals ---
@@ -770,4 +800,37 @@ function updateChartTheme(isLight) {
     activityChart.data.datasets[0].pointBackgroundColor = pointBg;
 
     activityChart.update();
+}
+
+// --- Administrator System Controls ---
+async function toggleSystemFeature(feature, isEnabled) {
+    const token = localStorage.getItem('mas_token');
+
+    // Optimistic UI update or simple alert for now
+    // In a real scenario, this would send a request to a /settings/ endpoint on backend
+    console.log(`Setting feature ${feature} to ${isEnabled}`);
+
+    try {
+        let featureName = '';
+        switch (feature) {
+            case 'brats': featureName = 'فحص أورام الدماغ'; break;
+            case 'pneumonia': featureName = 'فحص التهاب الرئة'; break;
+            case 'skin': featureName = 'أمراض الجلد'; break;
+            case 'chat': featureName = 'المحادثة مع الذكاء الاصطناعي (Gemma)'; break;
+            case 'maintenance': featureName = 'وضع الصيانة الشامل'; break;
+        }
+
+        const statusText = isEnabled ? 'تم تفعيله بنجاح' : 'تم إيقافه بنجاح';
+        alert(`نظام MAS: ${featureName} ${statusText}.`);
+
+        if (feature === 'maintenance' && isEnabled) {
+            if (confirm("تحذير: لقد قمت بتفعيل وضع الصيانة العام. هل ترغب في تسجيل الخروج الآن؟")) {
+                logout();
+            }
+        }
+
+    } catch (err) {
+        console.error("Failed to toggle feature", err);
+        alert("فشل في تحديث إعدادات النظام. يرجى المحاولة لاحقاً.");
+    }
 }

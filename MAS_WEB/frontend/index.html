@@ -33,10 +33,10 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar glass-panel">
             <div class="sidebar-header">
-                <div class="logo-circle" style="background: rgba(176, 0, 73, 0.1);">
+                <div class="logo-circle">
                     <img src="logo.ico" alt="MAS Logo" class="rotating-mas">
                 </div>
-                <h2 style="font-size: 1.2rem;">MAS <span>MEDICAL HUB</span></h2>
+                <h2>MAS <span>MEDICAL HUB</span></h2>
             </div>
 
             <nav class="sidebar-nav">
@@ -133,12 +133,13 @@
     <!-- Modals -->
     <div id="addBranchModal" class="modal">
         <div class="modal-content glass-panel">
-            <span class="close" onclick="closeModal('addBranchModal')">&times;</span>
-            <h3 style="color: var(--accent-main);"><i class="fa-solid fa-clinic-medical"></i> إضافة عيادة / فرع جديد
-            </h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">أدخل تفاصيل الموقع الجغرافي
-                للعيادة الجديدة.</p>
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-clinic-medical"></i> إضافة عيادة / فرع جديد</h2>
+                <span class="close" onclick="closeModal('addBranchModal')">&times;</span>
+            </div>
             <form id="addBranchForm" onsubmit="handleCreateBranch(event)">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">أدخل تفاصيل الموقع
+                    الجغرافي للعيادة الجديدة.</p>
                 <div class="input-group">
                     <i class="fa-solid fa-city"></i>
                     <input type="text" id="branchGov" placeholder="المحافظة" required>
@@ -151,18 +152,25 @@
                     <i class="fa-solid fa-phone"></i>
                     <input type="text" id="branchContact" placeholder="رقم هاتف التواصل">
                 </div>
-                <button type="submit" class="btn btn-primary w-100">حفظ وحفظ الفرع</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">حفظ الفرع الجديد</button>
+                    <button type="button" class="btn"
+                        style="background: rgba(255,255,255,0.05); color: var(--text-muted);"
+                        onclick="closeModal('addBranchModal')">إلغاء</button>
+                </div>
             </form>
         </div>
     </div>
 
     <div id="addSecretaryModal" class="modal">
         <div class="modal-content glass-panel">
-            <span class="close" onclick="closeModal('addSecretaryModal')">&times;</span>
-            <h3 style="color: var(--accent-main);"><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">يرجى تزويد بيانات الدخول
-                واختيار الفرع المسؤول عنه.</p>
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-user-plus"></i> تسجيل سكرتير جديد</h2>
+                <span class="close" onclick="closeModal('addSecretaryModal')">&times;</span>
+            </div>
             <form id="addSecretaryForm" onsubmit="handleRegisterSecretary(event)">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">يرجى تزويد بيانات الدخول
+                    واختيار الفرع المسؤول عنه.</p>
                 <div class="input-group">
                     <i class="fa-solid fa-user"></i>
                     <input type="text" id="secName" placeholder="الاسم الكامل" required>
@@ -182,7 +190,12 @@
                         <!-- سيتم تعبئتها بواسطة JS -->
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">إتمام التسجيل</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">إتمام التسجيل</button>
+                    <button type="button" class="btn"
+                        style="background: rgba(255,255,255,0.05); color: var(--text-muted);"
+                        onclick="closeModal('addSecretaryModal')">إلغاء</button>
+                </div>
             </form>
         </div>
     </div>
@@ -191,33 +204,39 @@
     <div id="addAdModal" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h2>إضافة إعلان جديد</h2>
+                <h2><i class="fa-solid fa-bullhorn"></i> إضافة إعلان جديد</h2>
                 <span class="close" onclick="closeModal('addAdModal')">&times;</span>
             </div>
             <form id="addAdForm" onsubmit="handleCreateAd(event)">
                 <div class="input-group">
-                    <i class="fa-solid fa-heading input-icon"></i>
+                    <i class="fa-solid fa-heading"></i>
                     <input type="text" id="adTitle" placeholder="عنوان الإعلان الرئيسي..." required>
                 </div>
                 <div class="input-group">
-                    <i class="fa-solid fa-paragraph input-icon"></i>
+                    <i class="fa-solid fa-paragraph"></i>
                     <input type="text" id="adSubtitle" placeholder="النص الفرعي..." required>
                 </div>
                 <div class="input-group">
-                    <i class="fa-solid fa-link input-icon"></i>
+                    <i class="fa-solid fa-link"></i>
                     <input type="url" id="adLink" placeholder="رابط الإعلان (اختياري)...">
                 </div>
                 <div class="file-upload-wrapper">
                     <label for="adImage" class="file-label">
                         <i class="fa-solid fa-cloud-upload-alt"></i>
-                        <span>اختر صورة الإعلان...</span>
+                        <span>اختر صورة الإعلان (اسحب وأفلت هنا)...</span>
                     </label>
-                    <input type="file" id="adImage" accept="image/*" required onchange="previewAdImage(this)">
+                    <input type="file" id="adImage" accept="image/*" required onchange="previewAdImage(this)"
+                        style="display:none;">
                     <div id="adImagePreview" class="image-preview-box"></div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-save"></i> حفظ ونشر الإعلان
-                </button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-save"></i> حفظ ونشر الإعلان
+                    </button>
+                    <button type="button" class="btn"
+                        style="background: rgba(255,255,255,0.05); color: var(--text-muted);"
+                        onclick="closeModal('addAdModal')">إلغاء</button>
+                </div>
             </form>
         </div>
     </div>

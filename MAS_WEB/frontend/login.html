@@ -19,11 +19,8 @@
     </button>
 
     <div class="login-container">
-        <!-- Glowing Orbs (CSS in style.css) -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-
-        <div class="login-glass-card">
+        <!-- Background Effects (Handled by style.css) -->
+        <div class="login-glass-card glass-panel wow-card">
             <div class="logo-container">
                 <div class="rotating-logo">
                     <img src="logo.ico" alt="MAS Logo">
@@ -31,12 +28,12 @@
             </div>
 
             <h1 class="login-title">MAS <span>MEDICAL HUB</span></h1>
-            <p class="login-subtitle">مركز التحكم وإدارة البيانات الطبية الموحدة</p>
+            <p class="login-subtitle">بوابة الإدارة الذكية والتحكم بالبيانات</p>
 
             <form class="login-form" onsubmit="handleLogin(event)">
                 <div class="input-group">
-                    <i class="fa-solid fa-user input-icon"></i>
-                    <input type="text" id="email" placeholder="اسم المستخدم أو البريد الإلكتروني" required>
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <input type="email" id="email" placeholder="البريد الإلكتروني للإدارة" required>
                 </div>
 
                 <div class="input-group">
@@ -45,13 +42,13 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary login-btn">
-                    دخول إلى النظام <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa-solid fa-unlock-keyhole"></i> دخول آمن للنظام
                 </button>
             </form>
 
             <div class="login-footer">
-                <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
                 <p>هذه البوابة مخصصة لمسؤولي المركز الطبي فقط.</p>
+                <a href="#" class="forgot-password">طلب استعادة الصلاحيات</a>
             </div>
         </div>
     </div>
